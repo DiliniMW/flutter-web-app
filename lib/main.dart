@@ -483,7 +483,7 @@ class FitGifPane extends StatelessWidget {
     (
       'SIGN-UP FLOW',
       'Account creation and onboarding',
-      'https://1drv.ms/v/c/7b0e173588eaad1f/IQDf8Jk4cIRGR4NNEtoOcnkbAUGj5jPY25zAGrdDCHSOUoc',
+      'https://photos.app.goo.gl/Vf9zXTRv5NMVAVnPA',
     ),
     (
       'SPLASH SCREEN',

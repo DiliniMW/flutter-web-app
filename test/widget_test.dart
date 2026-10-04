@@ -9,7 +9,10 @@ void main() {
     await tester.tap(find.text(r'$ cat about.md'));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('[01]  ABOUT_ME.md'), findsOneWidget);
-    expect(find.textContaining('Junior Integration & Test Engineer'), findsNWidgets(2));
+    expect(
+      find.textContaining('Junior Integration & Test Engineer'),
+      findsNWidgets(2),
+    );
     expect(find.textContaining('system testing for firmware'), findsOneWidget);
 
     await tester.tap(find.text(r'$ cd ./fitgif'));
