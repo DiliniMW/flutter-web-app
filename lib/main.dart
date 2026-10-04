@@ -52,7 +52,8 @@ class _PortfolioHomeState extends State<PortfolioHome>
   String typed = '';
   Timer? timer;
   late final AnimationController cursor;
-  static const intro = 'Flutter engineer. Systems thinker. Curious builder.';
+  static const intro =
+      'Integration & test engineer. Flutter builder. Systems thinker.';
 
   @override
   void initState() {
@@ -399,8 +400,8 @@ class HomePane extends StatelessWidget {
         Column(
           children: [
             LogLine('education', 'DCU + ESIGELEC double degree'),
-            LogLine('focus', 'electronic & computer engineering'),
-            LogLine('current', 'shipping reliable, user-first products'),
+            LogLine('role', 'Junior Integration & Test Engineer @ danalto'),
+            LogLine('focus', 'embedded systems + mobile products'),
             LogLine('status', 'ready to build', color: green),
           ],
         ),
@@ -419,23 +420,58 @@ class AboutPane extends StatelessWidget {
       PaneTitle('[01]  ABOUT_ME.md'),
       SizedBox(height: 18),
       Body(
-        'I am a graduate of the Dublin City University and ESIGELEC double-degree programme in General Engineering and Electronic & Computer Engineering.',
+        'I am an integration and test engineer with a general-engineering background spanning embedded systems, mobile development, system validation and product requirements.',
       ),
       SizedBox(height: 14),
       Body(
-        'My experience crosses the stack: modifying CPU behaviour through an ARM64 Android kernel module, designing a low-power MSP430 PCB in Altium, configuring ThingsBoard Cloud monitoring, and building an Android SDK demo for the Sanbot robot.',
+        'I enjoy working between technical and business needs: understanding how a system should behave, translating that into clear requirements, and testing whether the delivered firmware and software work as intended.',
       ),
       SizedBox(height: 22),
       TerminalBox(
-        'experience.json',
+        'current_role.json',
         Column(
           children: [
-            LogLine('kernel', 'ARM64 / Android / CPU features'),
-            LogLine('hardware', 'Altium / low-power MCU / pulse counter'),
-            LogLine('iot', 'ThingsBoard Cloud / monitoring'),
-            LogLine('robotics', 'Sanbot / Android SDK demo'),
+            LogLine('company', 'danalto'),
+            LogLine('position', 'Junior Integration & Test Engineer'),
+            LogLine('since', 'August 2025'),
+            LogLine('work', 'system testing for firmware and software'),
+            LogLine('scope', 'requirements + high-level platform design'),
           ],
         ),
+      ),
+      SizedBox(height: 18),
+      TerminalBox(
+        'background.json',
+        Column(
+          children: [
+            LogLine('ARM', 'device performance analysis / ARM64 kernel'),
+            LogLine('SLTMobitel', 'PCB design / IoT / Android robotics'),
+            LogLine('education', 'DCU + ESIGELEC double degree'),
+            LogLine('result', 'MEng first-class honours (1.1)', color: green),
+            LogLine('languages', 'English / French / Sinhala'),
+          ],
+        ),
+      ),
+      SizedBox(height: 24),
+      Text(
+        '> TOOLBOX',
+        style: TextStyle(color: green, fontSize: 12, letterSpacing: 1.5),
+      ),
+      SizedBox(height: 12),
+      Wrap(
+        spacing: 9,
+        runSpacing: 9,
+        children: [
+          Tag('DART / FLUTTER'),
+          Tag('C / JAVA / PYTHON'),
+          Tag('FIREBASE'),
+          Tag('GIT / GITHUB / GITLAB'),
+          Tag('DOCKER / ANSIBLE'),
+          Tag('THINGSBOARD'),
+          Tag('ANDROID'),
+          Tag('FIRMWARE TESTING'),
+          Tag('FIGMA'),
+        ],
       ),
     ],
   );
@@ -653,18 +689,65 @@ class ContactPane extends StatelessWidget {
       const SizedBox(height: 25),
       TerminalBox(
         'contact.sh',
-        InkWell(
-          onTap: () => launchURL('mailto:dona.wijetunge@groupe-esigelec.org'),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              '\$ mail dona.wijetunge@groupe-esigelec.org ↗',
-              style: TextStyle(color: green, fontSize: 15),
+        const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ContactLink(
+              command: 'mail',
+              label: 'dona.wijetunge@groupe-esigelec.org',
+              url: 'mailto:dona.wijetunge@groupe-esigelec.org',
             ),
-          ),
+            ContactLink(
+              command: 'open',
+              label: 'linkedin.com/in/dona-dilini-wijetunge',
+              url:
+                  'https://www.linkedin.com/in/dona-dilini-wijetunge-410911233/',
+            ),
+            ContactLink(
+              command: 'git',
+              label: 'github.com/DiliniMW',
+              url: 'https://github.com/DiliniMW',
+            ),
+          ],
         ),
       ),
     ],
+  );
+}
+
+class ContactLink extends StatelessWidget {
+  const ContactLink({
+    required this.command,
+    required this.label,
+    required this.url,
+    super.key,
+  });
+  final String command;
+  final String label;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: () => launchURL(url),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      child: Row(
+        children: [
+          Text(
+            '\$ $command ',
+            style: const TextStyle(color: muted, fontSize: 12),
+          ),
+          Expanded(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: green, fontSize: 13),
+            ),
+          ),
+          const Text('↗', style: TextStyle(color: amber)),
+        ],
+      ),
+    ),
   );
 }
 
