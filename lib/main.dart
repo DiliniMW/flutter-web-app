@@ -443,6 +443,28 @@ class AboutPane extends StatelessWidget {
 
 class FitGifPane extends StatelessWidget {
   const FitGifPane({super.key});
+  static const demos = [
+    (
+      'SIGN-UP FLOW',
+      'Account creation and onboarding',
+      'https://1drv.ms/v/c/7b0e173588eaad1f/IQDf8Jk4cIRGR4NNEtoOcnkbAUGj5jPY25zAGrdDCHSOUoc',
+    ),
+    (
+      'SPLASH SCREEN',
+      'Animated application launch',
+      'https://1drv.ms/v/c/7b0e173588eaad1f/IQAD81_iXieUQJpSQragZ8OpAdLc4u0U-4SnWv_Mc5LHp_c',
+    ),
+    (
+      'RANKING REVEAL',
+      'Parchment leaderboard animation',
+      'https://1drv.ms/v/c/7b0e173588eaad1f/IQCCEJe3U0dTS4KD_Y1Ig9RWAU49v3MEh07WcC1EriQQ6ZU',
+    ),
+    (
+      'WELCOME SCREEN',
+      'First-run product experience',
+      'https://1drv.ms/v/c/7b0e173588eaad1f/IQAi58NDVS37QapqamjqFE3IAakk6f0EMc-c4hZcx6yBizk',
+    ),
+  ];
   static const data = [
     (
       '01',
@@ -485,7 +507,41 @@ class FitGifPane extends StatelessWidget {
       const Body(
         'A Flutter fitness app developed from concept toward a production-ready product, one verified flow at a time.',
       ),
-      const SizedBox(height: 20),
+      const SizedBox(height: 24),
+      const FeaturedGif(),
+      const SizedBox(height: 28),
+      const Text(
+        '> FEATURE_DEMOS',
+        style: TextStyle(color: green, fontSize: 12, letterSpacing: 1.5),
+      ),
+      const SizedBox(height: 12),
+      LayoutBuilder(
+        builder: (_, c) {
+          final w = c.maxWidth > 680 ? (c.maxWidth - 12) / 2 : c.maxWidth;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (var i = 0; i < demos.length; i++)
+                SizedBox(
+                  width: w,
+                  child: DemoCard(
+                    number: '${i + 1}'.padLeft(2, '0'),
+                    title: demos[i].$1,
+                    description: demos[i].$2,
+                    url: demos[i].$3,
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+      const SizedBox(height: 30),
+      const Text(
+        '> ENGINEERING_LOG',
+        style: TextStyle(color: green, fontSize: 12, letterSpacing: 1.5),
+      ),
+      const SizedBox(height: 12),
       LayoutBuilder(
         builder: (_, c) {
           final w = c.maxWidth > 720 ? (c.maxWidth - 12) / 2 : c.maxWidth;
@@ -735,6 +791,179 @@ class CaseCard extends StatelessWidget {
           style: const TextStyle(color: muted, height: 1.5, fontSize: 13),
         ),
       ],
+    ),
+  );
+}
+
+class FeaturedGif extends StatelessWidget {
+  const FeaturedGif({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: ink,
+      border: Border.all(color: green.withValues(alpha: .65)),
+      borderRadius: BorderRadius.circular(6),
+      boxShadow: [
+        BoxShadow(color: green.withValues(alpha: .08), blurRadius: 24),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: const BoxDecoration(
+            color: panel2,
+            border: Border(bottom: BorderSide(color: line)),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.auto_awesome, color: amber, size: 15),
+              SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  'fitgif_render.output // FEATURED BUILD',
+                  style: TextStyle(color: green, fontSize: 11),
+                ),
+              ),
+              Text('LIVE', style: TextStyle(color: amber, fontSize: 10)),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(18),
+          child: LayoutBuilder(
+            builder:
+                (_, c) =>
+                    c.maxWidth > 620
+                        ? const Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(child: FeaturedGifImage()),
+                            SizedBox(width: 24),
+                            Expanded(child: FeaturedGifCopy()),
+                          ],
+                        )
+                        : const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FeaturedGifImage(),
+                            SizedBox(height: 18),
+                            FeaturedGifCopy(),
+                          ],
+                        ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class FeaturedGifImage extends StatelessWidget {
+  const FeaturedGifImage({super.key});
+  @override
+  Widget build(BuildContext context) => Container(
+    constraints: const BoxConstraints(maxHeight: 390),
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: Colors.black,
+      border: Border.all(color: line),
+      borderRadius: BorderRadius.circular(3),
+    ),
+    child: Center(
+      child: Image.asset('assets/fitgif_produced.gif', fit: BoxFit.contain),
+    ),
+  );
+}
+
+class FeaturedGifCopy extends StatelessWidget {
+  const FeaturedGifCopy({super.key});
+  @override
+  Widget build(BuildContext context) => const Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'THE OUTPUT IS THE PRODUCT',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      SizedBox(height: 12),
+      Body(
+        'FitGIF turns a completed workout into a shareable animated memory—giving progress a visual identity beyond numbers and charts.',
+      ),
+      SizedBox(height: 16),
+      LogLine('format', 'animated GIF'),
+      LogLine('source', 'completed workout'),
+      LogLine('result', 'ready to save and share', color: green),
+    ],
+  );
+}
+
+class DemoCard extends StatelessWidget {
+  const DemoCard({
+    required this.number,
+    required this.title,
+    required this.description,
+    required this.url,
+    super.key,
+  });
+  final String number;
+  final String title;
+  final String description;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: () => launchURL(url),
+    borderRadius: BorderRadius.circular(4),
+    child: Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: panel2,
+        border: Border.all(color: line),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: green.withValues(alpha: .1),
+              border: Border.all(color: green.withValues(alpha: .4)),
+            ),
+            child: const Icon(Icons.play_arrow_rounded, color: green, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$number // $title',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: const TextStyle(color: muted, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.open_in_new, color: amber, size: 15),
+        ],
+      ),
     ),
   );
 }

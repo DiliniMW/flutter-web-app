@@ -79,6 +79,7 @@ flutter:
     - assets/fitgif_logged_exercise.png
     - assets/fitgif_recipes.png
     - assets/fitgif_settings.png
+    - assets/fitgif_produced.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-imagesy
