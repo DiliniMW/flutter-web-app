@@ -3,7 +3,7 @@ name: Deploy Flutter web to GitHub Pages
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 permissions:
@@ -38,7 +38,7 @@ jobs:
         run: flutter test
 
       - name: Build web app
-        run: flutter build web --release --base-href "/dili_portfolio/"
+        run: flutter build web --release --base-href "/flutter-web-app/"
 
       - name: Disable Jekyll processing
         run: touch build/web/.nojekyll
