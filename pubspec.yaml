@@ -69,6 +69,16 @@ flutter:
     - assets/fitness_tracker_s.png
     - assets/recipes_s.png
     - assets/welcome_s.png
+    - assets/fitgif_arcade.png
+    - assets/fitgif_avatar.png
+    - assets/fitgif_bluetooth.png
+    - assets/fitgif_exercise_logger.png
+    - assets/fitgif_gif_creator.png
+    - assets/fitgif_gif_wall.png
+    - assets/fitgif_home.png
+    - assets/fitgif_logged_exercise.png
+    - assets/fitgif_recipes.png
+    - assets/fitgif_settings.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-imagesy

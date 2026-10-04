@@ -532,13 +532,16 @@ class ProjectsPane extends StatelessWidget {
 class InterfacesPane extends StatelessWidget {
   const InterfacesPane({super.key});
   static const data = [
-    ('welcome.ui', 'assets/welcome_s.png'),
-    ('register.ui', 'assets/register_s.png'),
-    ('login.ui', 'assets/login_s.png'),
-    ('home.ui', 'assets/home_s.png'),
-    ('profile.ui', 'assets/profile_s.png'),
-    ('recipes.ui', 'assets/recipes_s.png'),
-    ('tracker.ui', 'assets/fitness_tracker_s.png'),
+    ('home.ui', 'assets/fitgif_home.png'),
+    ('arcade.ui', 'assets/fitgif_arcade.png'),
+    ('avatar.ui', 'assets/fitgif_avatar.png'),
+    ('bluetooth.ui', 'assets/fitgif_bluetooth.png'),
+    ('exercise_logger.ui', 'assets/fitgif_exercise_logger.png'),
+    ('logged_exercise.ui', 'assets/fitgif_logged_exercise.png'),
+    ('gif_creator.ui', 'assets/fitgif_gif_creator.png'),
+    ('gif_wall.ui', 'assets/fitgif_gif_wall.png'),
+    ('recipes.ui', 'assets/fitgif_recipes.png'),
+    ('settings.ui', 'assets/fitgif_settings.png'),
   ];
   @override
   Widget build(BuildContext context) => Column(
