@@ -1,292 +1,868 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-void main() {
-  runApp(const DiliPortfolio());
-}
+void main() => runApp(const DiliPortfolio());
+
+const ink = Color(0xff07110e),
+    panel = Color(0xff0b1713),
+    panel2 = Color(0xff10221c);
+const green = Color(0xff69f0ae),
+    amber = Color(0xffffcb6b),
+    muted = Color(0xff88a198),
+    line = Color(0xff244238);
 
 class DiliPortfolio extends StatelessWidget {
   const DiliPortfolio({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Dilini\'s Portfolio',
-      debugShowCheckedModeBanner: false,
-      home: const PortfolioHome(),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Dilini // Portfolio',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData.dark().copyWith(
+      scaffoldBackgroundColor: ink,
+      textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'monospace'),
+    ),
+    home: const PortfolioHome(),
+  );
+}
+
+enum Section { home, about, fitgif, projects, interfaces, contact }
+
+extension SectionData on Section {
+  String get command => switch (this) {
+    Section.home => 'whoami',
+    Section.about => 'cat about.md',
+    Section.fitgif => 'cd ./fitgif',
+    Section.projects => 'ls ./projects',
+    Section.interfaces => 'open ./ui',
+    Section.contact => 'ping dilini',
+  };
 }
 
 class PortfolioHome extends StatefulWidget {
   const PortfolioHome({super.key});
-
   @override
   State<PortfolioHome> createState() => _PortfolioHomeState();
 }
 
 class _PortfolioHomeState extends State<PortfolioHome>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _sunBrightnessController;
-  late final Animation<double> _sunBrightness;
-  late Timer _themeTimer;
-
-  bool get isMorning {
-    final hour = DateTime.now().hour;
-    return hour >= 6 && hour < 18;
-  }
+  Section section = Section.home;
+  String typed = '';
+  Timer? timer;
+  late final AnimationController cursor;
+  static const intro = 'Flutter engineer. Systems thinker. Curious builder.';
 
   @override
   void initState() {
     super.initState();
-    // Animate sun brightness
-    _sunBrightnessController = AnimationController(
+    cursor = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4),
+      duration: const Duration(milliseconds: 650),
     )..repeat(reverse: true);
-    _sunBrightness = Tween<double>(begin: 0.5, end: 1.0)
-        .animate(CurvedAnimation(parent: _sunBrightnessController, curve: Curves.easeInOut));
-    // Update theme periodically
-    _themeTimer = Timer.periodic(const Duration(minutes: 5), (_) {
-      setState(() {});
+    var i = 0;
+    timer = Timer.periodic(const Duration(milliseconds: 42), (t) {
+      if (!mounted || i == intro.length) return t.cancel();
+      setState(() => typed += intro[i++]);
     });
   }
 
   @override
   void dispose() {
-    _sunBrightnessController.dispose();
-    _themeTimer.cancel();
+    timer?.cancel();
+    cursor.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    final bgColor = isMorning ? Colors.lightBlue[100]! : Colors.indigo[900]!;
-
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: Stack(
-        children: [
-          // Stationary sun or moon with pulsing brightness
-          Positioned(
-            top: 50,
-            left: 20,
-            child: isMorning
-                ? FadeTransition(opacity: _sunBrightness, child: _buildSun())
-                : _buildMoon(),
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: panel,
+            border: Border.all(color: line),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 30)],
           ),
-          // Trees at bottom corners
-          Positioned(
-            bottom: 0,
-            left: 20,
-            child: SimpleTree(controller: _sunBrightnessController),
-          ),
-          Positioned(
-            bottom: 0,
-            right: 20,
-            child: SimpleTree(controller: _sunBrightnessController),
-          ),
-          // Content overlay
-          Positioned.fill(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Center(
-                    child: Text(
-                      'Dilini\'s Portfolio',
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  _sectionTitle('About Me'),
-                  _sectionText(
-                    "I'm a recent graduate from Dublin City University & ESIGELEC who underwent a double degree program in General engineering(ESIGELEC) and electronic and computer engineering at DCU. I was able to obtain the experience of working with a kernel module that ran on a arm64 system(android phone) to modify a feature in the CPU from my recent internship. Also, from the internship before that, I was able to design a PCB on Altium designer using a low-power microcontroller for a pulse-counter project. Plus, over there, I was tasked with setting up the ThingsBoard Cloud platform with devices to establish user-cases for data monitoring. Moreover, I was tasked with getting a demo app running for a robot called the Sanbot that was controlled by an android SDK(this was needed for an exhibition). Also, during my first ever internship, I had the pleasure of being part of many administrative tasks related to a vending machine company(like handling supplier information, management of checks, data entry, special token counting, answering phone calls, welcoming guests etc. )(BTW this is my first-ever website and it is about me HAHA) Thank you for reading it. Very much appreciated:)",
-                  ),
-                  const SizedBox(height: 40),
-                  _sectionTitle('User Interfaces'),
-                  // Description under User Interfaces
-                  _sectionText('Here is sneak peak at the Flutter UI designs of the gamified fitness app I am making with friends. Tap a button to view each UI in detail.'),
-                  const SizedBox(height: 20),
-                  // Buttons to view each UI
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      _uiButton(context, label: 'Welcome UI', asset: 'assets/welcome_s.png'),
-                      _uiButton(context, label: 'Register UI', asset: 'assets/register_s.png'),
-                      _uiButton(context, label: 'Login UI', asset: 'assets/login_s.png'),
-                      _uiButton(context, label: 'Home UI', asset: 'assets/home_s.png'),
-                      _uiButton(context, label: 'Profile UI', asset: 'assets/profile_s.png'),
-                      _uiButton(context, label: 'Recipe UI', asset: 'assets/recipes_s.png'),
-                      _uiButton(context, label: 'Fitness Tracker UI', asset: 'assets/fitness_tracker_s.png'),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                  _sectionTitle('Projects'),
-                  _projectItem(
-                    title: 'Low-Power MSP430 Dev Board',
-                    link:
-                        'https://github.com/DiliniMW/Reference-file-for-the-long-technical-internship-/blob/main/Low%20power%20dev%20board/low%20Power%20dev%20Board/Schematic%20Print/Schematic%20Prints.PDF',
-                  ),
-                  _projectItem(
-                    title: 'Gamified fitness app (integrated with Firebase)',
-                    link:
-                        'https://github.com/DiliniMW/level-up-app',
-                  ),
-                  const SizedBox(height: 40),
-                  _sectionTitle('Contact'),
-                  _sectionText('Email me at dona.wijetunge@groupe-esigelec.org if you want to get in touch.'),
-                  const SizedBox(height: 20),
-                ],
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              WindowBar(section),
+              Expanded(
+                child: LayoutBuilder(
+                  builder:
+                      (_, c) =>
+                          c.maxWidth < 760
+                              ? Column(
+                                children: [
+                                  MobileNav(section, select),
+                                  Expanded(
+                                    child: Content(section, typed, cursor),
+                                  ),
+                                ],
+                              )
+                              : Row(
+                                children: [
+                                  SizedBox(
+                                    width: 235,
+                                    child: Sidebar(section, select),
+                                  ),
+                                  const VerticalDivider(width: 1, color: line),
+                                  Expanded(
+                                    child: Content(section, typed, cursor),
+                                  ),
+                                ],
+                              ),
+                ),
               ),
-            ),
+              StatusBar(section),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSun() {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: const BoxDecoration(
-        color: Colors.yellow,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(color: Colors.orangeAccent, blurRadius: 20, spreadRadius: 5),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMoon() {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [BoxShadow(color: Colors.grey.shade700, blurRadius: 10)],
-      ),
-    );
-  }
-
-  Widget _sectionTitle(String text) => Text(
-        text,
-        style: const TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
         ),
-      );
+      ),
+    ),
+  );
 
-  Widget _sectionText(String text) => Padding(
-        padding: const EdgeInsets.only(top: 12.0),
-        child: Text(text, style: const TextStyle(fontSize: 16, color: Colors.white)),
-      );
-
-  Widget _showcaseImage(String asset) => Image.asset(asset, width: 300, fit: BoxFit.cover);
-
-  Widget _projectItem({required String title, required String link}) => Padding(
-        padding: const EdgeInsets.only(top: 12.0),
-        child: Row(
-          children: [
-            Text(title, style: const TextStyle(fontSize: 16, color: Colors.white)),
-            const SizedBox(width: 10),
-            InkWell(
-                 onTap: () {
-              // only works on web
-              launchURL(link);},
-              child: const Text(
-                'View Repo',
-                style: TextStyle(color: Colors.yellowAccent, decoration: TextDecoration.underline),
-              ),
-            ),
-          ],
-        ),
-      );
+  void select(Section value) => setState(() => section = value);
 }
-void launchURL(String url) async {
-  final Uri uri = Uri.parse(url);
-  if (await canLaunchUrl(uri)) {
-    await launchUrl(uri);
-  }
-}
-// Styled UI Button matching CustomButton design
-Widget _uiButton(BuildContext context, {required String label, required String asset}) {
-  return SizedBox(
-    width: MediaQuery.of(context).size.width * 0.20,
-    child: ElevatedButton(
-      onPressed: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => Scaffold(
-              appBar: AppBar(title: Text(label)),
-              backgroundColor: Colors.black,
-              body: Center(child: Image.asset(asset)),
-            ),
+
+class WindowBar extends StatelessWidget {
+  const WindowBar(this.section, {super.key});
+  final Section section;
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 48,
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    decoration: const BoxDecoration(
+      color: panel2,
+      border: Border(bottom: BorderSide(color: line)),
+    ),
+    child: Row(
+      children: [
+        for (final color in const [
+          Color(0xffff5f56),
+          Color(0xffffbd2e),
+          Color(0xff27c93f),
+        ]) ...[
+          Container(
+            width: 11,
+            height: 11,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-        );
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 0, 115, 255),
-        foregroundColor: Colors.white,
-        elevation: 8,
-        shadowColor: const Color.fromARGB(255, 64, 109, 255),
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: Colors.white, width: 2),
+          const SizedBox(width: 8),
+        ],
+        const Spacer(),
+        Flexible(
+          child: Text(
+            'dilini@portfolio:~/${section.name}',
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: muted, fontSize: 12),
+          ),
         ),
-        textStyle: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Fredoka',
-        ),
-      ),
-      child: Text(label),
+        const Spacer(),
+        const Text('UTF-8', style: TextStyle(color: muted, fontSize: 11)),
+      ],
     ),
   );
 }
 
-// Simple tree with swaying leaves
-class SimpleTree extends StatelessWidget {
-  final AnimationController controller;
-  const SimpleTree({required this.controller, super.key});
-
+class Sidebar extends StatelessWidget {
+  const Sidebar(this.section, this.select, {super.key});
+  final Section section;
+  final ValueChanged<Section> select;
   @override
-  Widget build(BuildContext context) => CustomPaint(
-        painter: _SimpleTreePainter(controller),
-        size: const Size(100, 200),
-      );
+  Widget build(BuildContext context) => ColoredBox(
+    color: const Color(0xff091410),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 6),
+          const Text(
+            'DILINI.EXE',
+            style: TextStyle(
+              color: green,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
+          ),
+          const Text(
+            'portfolio shell v2.0',
+            style: TextStyle(color: muted, fontSize: 11),
+          ),
+          const SizedBox(height: 28),
+          const Text(
+            'COMMANDS',
+            style: TextStyle(color: muted, fontSize: 10, letterSpacing: 2),
+          ),
+          const SizedBox(height: 8),
+          for (final s in Section.values)
+            NavItem(s, s == section, () => select(s)),
+          const Spacer(),
+          const Row(
+            children: [
+              Icon(Icons.circle, size: 8, color: green),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'available for work',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: muted, fontSize: 11),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
-class _SimpleTreePainter extends CustomPainter {
-  final Animation<double> animation;
-  _SimpleTreePainter(this.animation) : super(repaint: animation);
-
+class NavItem extends StatelessWidget {
+  const NavItem(this.item, this.selected, this.tap, {super.key});
+  final Section item;
+  final bool selected;
+  final VoidCallback tap;
   @override
-  void paint(Canvas canvas, Size size) {
-    final trunkPaint = Paint()..color = Colors.brown;
-    final leafPaint = Paint()..color = Colors.green;
-    canvas.drawRect(
-      Rect.fromLTWH(size.width / 2 - 10, size.height - 80, 20, 80), trunkPaint);
-    final sway = (animation.value - 0.5) * 0.1;
-    canvas.save();
-    canvas.translate(size.width / 2, size.height - 80);
-    canvas.rotate(sway);
-    canvas.drawCircle(const Offset(0, -40), 50, leafPaint);
-    canvas.restore();
-  }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 4),
+    child: InkWell(
+      onTap: tap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: selected ? green.withValues(alpha: .1) : null,
+          border: Border(
+            left: BorderSide(
+              color: selected ? green : Colors.transparent,
+              width: 2,
+            ),
+          ),
+        ),
+        child: Text(
+          '\$ ${item.command}',
+          style: TextStyle(color: selected ? green : muted, fontSize: 12),
+        ),
+      ),
+    ),
+  );
+}
 
+class MobileNav extends StatelessWidget {
+  const MobileNav(this.section, this.select, {super.key});
+  final Section section;
+  final ValueChanged<Section> select;
   @override
-  bool shouldRepaint(CustomPainter old) => true;
+  Widget build(BuildContext context) => Container(
+    height: 55,
+    decoration: const BoxDecoration(
+      color: Color(0xff091410),
+      border: Border(bottom: BorderSide(color: line)),
+    ),
+    child: ListView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.all(8),
+      children: [
+        for (final s in Section.values)
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: OutlinedButton(
+              onPressed: () => select(s),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: s == section ? green : muted,
+                side: BorderSide(color: s == section ? green : line),
+              ),
+              child: Text('./${s.name}', style: const TextStyle(fontSize: 11)),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+class Content extends StatelessWidget {
+  const Content(this.section, this.typed, this.cursor, {super.key});
+  final Section section;
+  final String typed;
+  final Animation<double> cursor;
+  @override
+  Widget build(BuildContext context) => SelectionArea(
+    child: AnimatedSwitcher(
+      duration: const Duration(milliseconds: 220),
+      child: SingleChildScrollView(
+        key: ValueKey(section),
+        padding: const EdgeInsets.all(24),
+        child: switch (section) {
+          Section.home => HomePane(typed, cursor),
+          Section.about => const AboutPane(),
+          Section.fitgif => const FitGifPane(),
+          Section.projects => const ProjectsPane(),
+          Section.interfaces => const InterfacesPane(),
+          Section.contact => const ContactPane(),
+        },
+      ),
+    ),
+  );
+}
+
+class CommandHeader extends StatelessWidget {
+  const CommandHeader(this.text, {super.key});
+  final String text;
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        'dilini@portfolio:~\$ $text',
+        style: const TextStyle(color: green, fontSize: 13),
+      ),
+      const SizedBox(height: 7),
+      const Divider(color: line),
+      const SizedBox(height: 20),
+    ],
+  );
+}
+
+class HomePane extends StatelessWidget {
+  const HomePane(this.typed, this.cursor, {super.key});
+  final String typed;
+  final Animation<double> cursor;
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const CommandHeader('whoami --verbose'),
+      const Text(
+        'HELLO, I\'M',
+        style: TextStyle(color: muted, letterSpacing: 3, fontSize: 12),
+      ),
+      const SizedBox(height: 8),
+      const Text(
+        'DILINI',
+        style: TextStyle(
+          color: green,
+          fontSize: 56,
+          height: .95,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 4,
+        ),
+      ),
+      const Text(
+        'WIJETUNGE',
+        style: TextStyle(
+          fontSize: 38,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 2,
+        ),
+      ),
+      const SizedBox(height: 22),
+      Row(
+        children: [
+          Flexible(
+            child: Text(
+              typed,
+              style: const TextStyle(color: amber, fontSize: 16),
+            ),
+          ),
+          FadeTransition(
+            opacity: cursor,
+            child: Container(
+              width: 9,
+              height: 19,
+              margin: const EdgeInsets.only(left: 3),
+              color: green,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 32),
+      const Wrap(
+        spacing: 9,
+        runSpacing: 9,
+        children: [
+          Tag('FLUTTER'),
+          Tag('FIREBASE'),
+          Tag('EMBEDDED'),
+          Tag('CLOUD'),
+          Tag('PRODUCT ENGINEERING'),
+        ],
+      ),
+      const SizedBox(height: 32),
+      const TerminalBox(
+        'session.log',
+        Column(
+          children: [
+            LogLine('education', 'DCU + ESIGELEC double degree'),
+            LogLine('focus', 'electronic & computer engineering'),
+            LogLine('current', 'shipping reliable, user-first products'),
+            LogLine('status', 'ready to build', color: green),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+class AboutPane extends StatelessWidget {
+  const AboutPane({super.key});
+  @override
+  Widget build(BuildContext context) => const Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      CommandHeader('cat about.md'),
+      PaneTitle('[01]  ABOUT_ME.md'),
+      SizedBox(height: 18),
+      Body(
+        'I am a graduate of the Dublin City University and ESIGELEC double-degree programme in General Engineering and Electronic & Computer Engineering.',
+      ),
+      SizedBox(height: 14),
+      Body(
+        'My experience crosses the stack: modifying CPU behaviour through an ARM64 Android kernel module, designing a low-power MSP430 PCB in Altium, configuring ThingsBoard Cloud monitoring, and building an Android SDK demo for the Sanbot robot.',
+      ),
+      SizedBox(height: 22),
+      TerminalBox(
+        'experience.json',
+        Column(
+          children: [
+            LogLine('kernel', 'ARM64 / Android / CPU features'),
+            LogLine('hardware', 'Altium / low-power MCU / pulse counter'),
+            LogLine('iot', 'ThingsBoard Cloud / monitoring'),
+            LogLine('robotics', 'Sanbot / Android SDK demo'),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+class FitGifPane extends StatelessWidget {
+  const FitGifPane({super.key});
+  static const data = [
+    (
+      '01',
+      'PRODUCTION MINDSET',
+      'Engineered real user journeys, edge cases, account flows, workout tracking, exports and monetisation.',
+    ),
+    (
+      '02',
+      'FLOW-BY-FLOW TESTING',
+      'Validated screens, services, permissions, exports and notifications as individual flows.',
+    ),
+    (
+      '03',
+      'LOG-DRIVEN DEBUGGING',
+      'Turned unclear runtime failures into specific, testable engineering tasks.',
+    ),
+    (
+      '04',
+      'CLOUD INFRASTRUCTURE',
+      'Connected authentication, storage, backend services, credits and subscriptions.',
+    ),
+    (
+      '05',
+      'USER-FIRST REQUIREMENTS',
+      'Designed for what users expect, what can fail and what must remain clear.',
+    ),
+    (
+      '06',
+      'CODEX COLLABORATION',
+      'Used focused questions, logs and assumption checks to ship working changes.',
+    ),
+  ];
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const CommandHeader('tree ~/fitgif'),
+      const PaneTitle('[02]  FITGIF // CASE STUDY'),
+      const SizedBox(height: 8),
+      const Body(
+        'A Flutter fitness app developed from concept toward a production-ready product, one verified flow at a time.',
+      ),
+      const SizedBox(height: 20),
+      LayoutBuilder(
+        builder: (_, c) {
+          final w = c.maxWidth > 720 ? (c.maxWidth - 12) / 2 : c.maxWidth;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final x in data)
+                SizedBox(width: w, child: CaseCard(x.$1, x.$2, x.$3)),
+            ],
+          );
+        },
+      ),
+    ],
+  );
+}
+
+class ProjectsPane extends StatelessWidget {
+  const ProjectsPane({super.key});
+  @override
+  Widget build(BuildContext context) => const Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      CommandHeader('ls -la ./projects'),
+      PaneTitle('[03]  PROJECT INDEX'),
+      SizedBox(height: 18),
+      ProjectRow(
+        '01',
+        'FitGIF',
+        'Flutter · Firebase · Cloud',
+        'https://github.com/DiliniMW/level-up-app',
+      ),
+      SizedBox(height: 12),
+      ProjectRow(
+        '02',
+        'Low-Power MSP430 Dev Board',
+        'Altium · Embedded · PCB',
+        'https://github.com/DiliniMW/Reference-file-for-the-long-technical-internship-/blob/main/Low%20power%20dev%20board/low%20Power%20dev%20Board/Schematic%20Print/Schematic%20Prints.PDF',
+      ),
+    ],
+  );
+}
+
+class InterfacesPane extends StatelessWidget {
+  const InterfacesPane({super.key});
+  static const data = [
+    ('welcome.ui', 'assets/welcome_s.png'),
+    ('register.ui', 'assets/register_s.png'),
+    ('login.ui', 'assets/login_s.png'),
+    ('home.ui', 'assets/home_s.png'),
+    ('profile.ui', 'assets/profile_s.png'),
+    ('recipes.ui', 'assets/recipes_s.png'),
+    ('tracker.ui', 'assets/fitness_tracker_s.png'),
+  ];
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const CommandHeader('find . -name "*.ui"'),
+      const PaneTitle('[04]  UI ARCHIVE'),
+      const SizedBox(height: 8),
+      const Body(
+        'Selected FitGIF screens. Click a file to inspect it in a preview pane.',
+      ),
+      const SizedBox(height: 20),
+      LayoutBuilder(
+        builder: (_, c) {
+          final cols =
+              c.maxWidth > 800
+                  ? 3
+                  : c.maxWidth > 480
+                  ? 2
+                  : 1;
+          final w = (c.maxWidth - 12 * (cols - 1)) / cols;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final x in data)
+                SizedBox(width: w, child: UiFile(x.$1, x.$2)),
+            ],
+          );
+        },
+      ),
+    ],
+  );
+}
+
+class ContactPane extends StatelessWidget {
+  const ContactPane({super.key});
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const CommandHeader('ping dilini --say-hello'),
+      const PaneTitle('[05]  ESTABLISH A CONNECTION'),
+      const SizedBox(height: 18),
+      const Text(
+        'Have a role, project or interesting problem?',
+        style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 10),
+      const Body(
+        'My inbox is open. Send a message and I will get back to you.',
+      ),
+      const SizedBox(height: 25),
+      TerminalBox(
+        'contact.sh',
+        InkWell(
+          onTap: () => launchURL('mailto:dona.wijetunge@groupe-esigelec.org'),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              '\$ mail dona.wijetunge@groupe-esigelec.org ↗',
+              style: TextStyle(color: green, fontSize: 15),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+class PaneTitle extends StatelessWidget {
+  const PaneTitle(this.text, {super.key});
+  final String text;
+  @override
+  Widget build(BuildContext c) => Text(
+    text,
+    style: const TextStyle(
+      fontSize: 26,
+      fontWeight: FontWeight.bold,
+      letterSpacing: 1,
+    ),
+  );
+}
+
+class Body extends StatelessWidget {
+  const Body(this.text, {super.key});
+  final String text;
+  @override
+  Widget build(BuildContext c) => Text(
+    text,
+    style: const TextStyle(color: Color(0xffc5d4ce), fontSize: 15, height: 1.7),
+  );
+}
+
+class Tag extends StatelessWidget {
+  const Tag(this.text, {super.key});
+  final String text;
+  @override
+  Widget build(BuildContext c) => Container(
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(color: panel2, border: Border.all(color: line)),
+    child: Text('<$text/>', style: const TextStyle(color: muted, fontSize: 11)),
+  );
+}
+
+class TerminalBox extends StatelessWidget {
+  const TerminalBox(this.title, this.child, {super.key});
+  final String title;
+  final Widget child;
+  @override
+  Widget build(BuildContext c) => Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: ink,
+      border: Border.all(color: line),
+      borderRadius: BorderRadius.circular(5),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(9),
+          decoration: const BoxDecoration(
+            color: panel2,
+            border: Border(bottom: BorderSide(color: line)),
+          ),
+          child: Text(
+            title,
+            style: const TextStyle(color: muted, fontSize: 11),
+          ),
+        ),
+        Padding(padding: const EdgeInsets.all(14), child: child),
+      ],
+    ),
+  );
+}
+
+class LogLine extends StatelessWidget {
+  const LogLine(
+    this.name,
+    this.value, {
+    this.color = const Color(0xffc5d4ce),
+    super.key,
+  });
+  final String name, value;
+  final Color color;
+  @override
+  Widget build(BuildContext c) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 5),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            '"$name":',
+            style: const TextStyle(color: amber, fontSize: 12),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            '"$value"',
+            style: TextStyle(color: color, fontSize: 12, height: 1.4),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class CaseCard extends StatelessWidget {
+  const CaseCard(this.no, this.title, this.text, {super.key});
+  final String no, title, text;
+  @override
+  Widget build(BuildContext c) => Container(
+    padding: const EdgeInsets.all(17),
+    decoration: BoxDecoration(color: panel2, border: Border.all(color: line)),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '> module_$no',
+          style: const TextStyle(color: green, fontSize: 11),
+        ),
+        const SizedBox(height: 10),
+        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 7),
+        Text(
+          text,
+          style: const TextStyle(color: muted, height: 1.5, fontSize: 13),
+        ),
+      ],
+    ),
+  );
+}
+
+class ProjectRow extends StatelessWidget {
+  const ProjectRow(this.no, this.title, this.tech, this.url, {super.key});
+  final String no, title, tech, url;
+  @override
+  Widget build(BuildContext c) => InkWell(
+    onTap: () => launchURL(url),
+    child: Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(color: panel2, border: Border.all(color: line)),
+      child: Row(
+        children: [
+          Text('drwx $no', style: const TextStyle(color: muted, fontSize: 11)),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(tech, style: const TextStyle(color: muted, fontSize: 12)),
+              ],
+            ),
+          ),
+          const Text('OPEN ↗', style: TextStyle(color: green, fontSize: 11)),
+        ],
+      ),
+    ),
+  );
+}
+
+class UiFile extends StatelessWidget {
+  const UiFile(this.name, this.asset, {super.key});
+  final String name, asset;
+  @override
+  Widget build(BuildContext c) => InkWell(
+    onTap:
+        () => showDialog<void>(
+          context: c,
+          builder:
+              (_) => Dialog(
+                backgroundColor: panel,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 430,
+                    maxHeight: 720,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          'preview > $name',
+                          style: const TextStyle(color: green),
+                        ),
+                      ),
+                      const Divider(color: line),
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Image.asset(asset, fit: BoxFit.contain),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+        ),
+    child: Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(color: panel2, border: Border.all(color: line)),
+      child: Row(
+        children: [
+          const Icon(Icons.insert_drive_file_outlined, color: green, size: 17),
+          const SizedBox(width: 9),
+          Expanded(child: Text(name, style: const TextStyle(fontSize: 12))),
+          const Text('open ↗', style: TextStyle(color: muted, fontSize: 10)),
+        ],
+      ),
+    ),
+  );
+}
+
+class StatusBar extends StatelessWidget {
+  const StatusBar(this.section, {super.key});
+  final Section section;
+  @override
+  Widget build(BuildContext c) => Container(
+    height: 28,
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    color: green,
+    child: Row(
+      children: [
+        const Text(
+          '● NORMAL',
+          style: TextStyle(
+            color: ink,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 18),
+        Text(
+          '~/${section.name}',
+          style: const TextStyle(color: ink, fontSize: 10),
+        ),
+        const Spacer(),
+        const Text(
+          'DART • FLUTTER WEB',
+          style: TextStyle(
+            color: ink,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Future<void> launchURL(String value) async {
+  final uri = Uri.parse(value);
+  if (!await launchUrl(uri)) debugPrint('Could not launch $value');
 }
